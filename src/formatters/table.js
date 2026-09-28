@@ -6,7 +6,7 @@ function formatUptime(seconds) {
 }
 
 export function renderText(data) {
-  const { system, memory, runtime } = data;
+  const { host, os, cpu, memory, runtime } = data;
 
   return `
   ========================================
@@ -18,11 +18,17 @@ export function renderText(data) {
     Libuv          : ${runtime.libuvVersion}
     Process PID    : ${runtime.pid}
   
-  [Host Machine]
-    OS Platform    : ${system.platform} (${system.arch})
-    Kernel Release : ${system.release}
-    CPU Model      : ${system.cpuModel} (${system.cpuCores} cores)
-    System Uptime  : ${formatUptime(system.uptimeSeconds)}
+  [Host & OS]
+    Hostname       : ${host.hostname}
+    User           : ${host.userInfo.username}
+    OS Platform    : ${os.platform} (${os.arch})
+    Kernel Release : ${os.release}
+    System Uptime  : ${formatUptime(host.uptimeSeconds)}
+  
+  [CPU Details]
+    Model          : ${cpu.model}
+    Cores          : ${cpu.cores} @ ${cpu.speedMhz} MHz
+    Load Avg (15m) : ${cpu.loadAvg.map((l) => l.toFixed(2)).join(", ")}
   
   [Memory Allocation]
     Total RAM      : ${memory.system.totalMB} MB

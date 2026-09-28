@@ -2,26 +2,29 @@ import os from "node:os";
 import process from "node:process";
 
 function toMB(bytes) {
-  return (bytes / 1024 / 1024).toFixed(2);
+  return Math.round((bytes / 1024 / 1024) * 100) / 100;
 }
 
 export function getMemoryInfo() {
-  const totalMem = os.totalmem();
-  const freeMem = os.freemem();
-  const usedMem = totalMem - freeMem;
+  const totalBytes = os.totalmem();
+  const freeBytes = os.freemem();
+  const usedBytes = totalBytes - freeBytes;
   const memoryUsage = process.memoryUsage();
+
+  const usageRatio = totalBytes > 0 ? (usedBytes / totalBytes) * 100 : 0;
 
   return {
     system: {
-      totalMB: toMB(totalMem),
-      freeMB: toMB(freeMem),
-      usedMB: toMB(usedMem),
-      usagePercent: ((usedMem / totalMem) * 100).toFixed(1),
+      totalMB: toMB(totalBytes),
+      freeMB: toMB(freeBytes),
+      usedMB: toMB(usedBytes),
+      usagePercent: Math.round(usageRatio * 10) / 10,
     },
     process: {
+      rssMB: toMB(memoryUsage.rss),
       heapTotalMB: toMB(memoryUsage.heapTotal),
       heapUsedMB: toMB(memoryUsage.heapUsed),
-      rssMB: toMB(memoryUsage.rss),
+      externalMB: toMB(memoryUsage.external),
     },
   };
 }

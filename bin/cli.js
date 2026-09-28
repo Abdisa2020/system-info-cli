@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 import process from "node:process";
-import { getSystemInfo } from "../src/collectors/system.js";
-import { getMemoryInfo } from "../src/collectors/memory.js";
-import { getRuntimeInfo } from "../src/collectors/runtime.js";
+import { systemInfoService } from "../src/services/systemInfoService.js";
 import { renderText } from "../src/formatters/table.js";
 
 const args = process.argv.slice(2);
 
+// 1. Receive CLI arguments
 if (args.includes("--help") || args.includes("-h")) {
   console.log(`
 Usage: sys-info [options]
@@ -21,22 +20,19 @@ Options:
 }
 
 if (args.includes("--version") || args.includes("-v")) {
-  console.log("sys-info-cli v1.0.0");
+  console.log("sys-info-cli v1.1.0");
   process.exit(0);
 }
 
 try {
-  const diagnostics = {
-    timestamp: new Date().toISOString(),
-    runtime: getRuntimeInfo(),
-    system: getSystemInfo(),
-    memory: getMemoryInfo(),
-  };
+  // 2. Ask service for data
+  const data = systemInfoService.getSnapshot();
 
+  // 3 & 4. Choose formatter and display result
   if (args.includes("--json") || args.includes("-j")) {
-    console.log(JSON.stringify(diagnostics, null, 2));
+    console.log(JSON.stringify(data, null, 2));
   } else {
-    console.log(renderText(diagnostics));
+    console.log(renderText(data));
   }
 } catch (error) {
   console.error("Fatal: Failed to collect environment metrics:", error.message);

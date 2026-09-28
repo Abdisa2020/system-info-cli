@@ -1,0 +1,23 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { getRuntimeInfo } from '../src/collectors/runtime.js';
+import { getMemoryInfo } from '../src/collectors/memory.js';
+import { getSystemInfo } from '../src/collectors/system.js';
+
+test('getRuntimeInfo returns valid node properties', () => {
+  const info = getRuntimeInfo();
+  assert.ok(info.nodeVersion.startsWith('v'), 'Node version should begin with v');
+  assert.equal(typeof info.pid, 'number');
+});
+
+test('getMemoryInfo calculates valid percentages', () => {
+  const mem = getMemoryInfo();
+  const percent = parseFloat(mem.system.usagePercent);
+  assert.ok(percent >= 0 && percent <= 100, 'Usage percent should be within 0-100%');
+});
+
+test('getSystemInfo returns CPU architecture', () => {
+  const sys = getSystemInfo();
+  assert.ok(sys.cpuCores > 0, 'CPU core count should be greater than zero');
+  assert.ok(typeof sys.arch === 'string');
+});

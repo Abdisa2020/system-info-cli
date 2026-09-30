@@ -6,20 +6,32 @@ import { getRuntimeInfo } from "../collectors/runtime.js";
 
 export class SystemInfoService {
   /**
-   * Orchestrates system metric collection.
-   * Can be reused by CLI, Express routes, or WebSocket daemons.
+   * The constructors recives dependencies from the out side
+   * we provide defualt fallbacks so production code doesn't breakk if called with new SystemInforService().
    */
+
+  constructor(collectors = {}) {
+    this.collectors = {
+      getCpuInfo: collectors.getCpuInfo ?? getCpuInfo,
+      getHostInfo: collectors.getHostInfo ?? getHostInfo,
+      getMemoryInfo: collectors.getMemoryInfo ?? getMemoryInfo,
+      getOsInfo: collectors.getOsInfo ?? getOsInfo,
+      getRuntimeInfo: collectors.getRuntimeInfo ?? getRuntimeInfo,
+    };
+  }
+
+  // Orchestrates metric collection using the injected dependencies stored on `this`.
   getSnapshot() {
     return {
       timestamp: new Date().toISOString(),
-      host: getHostInfo(),
-      os: getOsInfo(),
-      cpu: getCpuInfo(),
-      memory: getMemoryInfo(),
-      runtime: getRuntimeInfo(),
+      host: this.collectors.getHostInfo(),
+      os: this.collectors.getOsInfo(),
+      cpu: this.collectors.getCpuInfo(),
+      memory: this.collectors.getMemoryInfo(),
+      runtime: this.collectors.getRuntimeInfo(),
     };
   }
 }
 
-// Export singleton instance for convenient use
+// Default singleton instance using the standard Os collectors
 export const systemInfoService = new SystemInfoService();
